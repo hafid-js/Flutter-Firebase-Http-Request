@@ -14,8 +14,7 @@ class Players with ChangeNotifier {
   Player selectById(String id) =>
       _allPlayer.firstWhere((element) => element.id == id);
 
-  Future<void> addPlayer(
-      String name, String position, String image) {
+  Future<void> addPlayer(String name, String position, String image) {
     DateTime datetimeNow = DateTime.now();
 
     print("SEBELUM HTTP");
@@ -44,30 +43,30 @@ class Players with ChangeNotifier {
     });
   }
 
-  void editPlayer(String id, String name, String position, String image,
-      BuildContext context) {
-    Player selectPlayer = _allPlayer.firstWhere((element) => element.id == id);
-    selectPlayer.name = name;
-    selectPlayer.position = position;
-    selectPlayer.imageUrl = image;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("Berhasil diubah"),
-        duration: Duration(seconds: 2),
-      ),
-    );
-    notifyListeners();
-  }
-
-  Future<void> deletePlayer(String id) {
-
+  Future<void> editPlayer(String id, String name, String position, String image) {
     Uri url = Uri.parse(
         "https://http-req-9401d-default-rtdb.firebaseio.com/players/$id.json");
     return http
-        .delete(url)
+        .patch(url,
+            body: json.encode({
+              "name": name,
+              "position": position,
+              "imageUrl": image,
+            }))
         .then((response) {
-          _allPlayer.removeWhere((element) => element.id == id);
+      Player selectPlayer =
+          _allPlayer.firstWhere((element) => element.id == id);
+      selectPlayer.name = name;
+      selectPlayer.position = position;
+      selectPlayer.imageUrl = image;
+    });
+  }
+
+  Future<void> deletePlayer(String id) {
+    Uri url = Uri.parse(
+        "https://http-req-9401d-default-rtdb.firebaseio.com/players/$id.json");
+    return http.delete(url).then((response) {
+      _allPlayer.removeWhere((element) => element.id == id);
       notifyListeners();
     });
   }

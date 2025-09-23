@@ -54,35 +54,46 @@ class DetailPlayer extends StatelessWidget {
                 controller: positionController,
               ),
               TextFormField(
-                autocorrect: false,
-                decoration: InputDecoration(labelText: "Image URL"),
-                textInputAction: TextInputAction.done,
-                controller: imageController,
-                onEditingComplete: () {
-                  players.editPlayer(
-                    playerId,
-                    nameController.text,
-                    positionController.text,
-                    imageController.text,
-                    context,
-                  );
-                  Navigator.pop(context);
-                },
-              ),
+                  autocorrect: false,
+                  decoration: InputDecoration(labelText: "Image URL"),
+                  textInputAction: TextInputAction.done,
+                  controller: imageController,
+                  onEditingComplete: () {
+                    players
+                        .editPlayer(playerId, nameController.text,
+                            positionController.text, imageController.text)
+                        .then((_) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("Berhasil diubah"),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                      Navigator.pop(context);
+                    });
+                  }),
               SizedBox(height: 50),
               Container(
                 width: double.infinity,
                 alignment: Alignment.centerRight,
                 child: OutlinedButton(
                   onPressed: () {
-                    players.editPlayer(
+                    players
+                        .editPlayer(
                       playerId,
                       nameController.text,
                       positionController.text,
                       imageController.text,
-                      context,
-                    );
-                    Navigator.pop(context);
+                    )
+                        .then((_) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("Berhasil diubah"),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                      Navigator.pop(context);
+                    });
                   },
                   child: Text(
                     "Edit",
