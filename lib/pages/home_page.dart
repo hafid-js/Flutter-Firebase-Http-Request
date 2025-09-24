@@ -7,7 +7,31 @@ import '../pages/add_player_page.dart';
 
 import '../providers/players.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+
+  bool isInit = true;
+
+
+  @override
+  void didChangeDependencies() {
+   if(isInit) {
+     Provider.of<Players>(context).initialData();
+   }
+   isInit = false;
+    super.didChangeDependencies();
+  }
+
+  @override
+  void dispose() {
+    isInit = true;
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final allPlayerProvider = Provider.of<Players>(context);
@@ -19,6 +43,14 @@ class HomePage extends StatelessWidget {
             icon: Icon(Icons.add),
             onPressed: () {
               Navigator.pushNamed(context, AddPlayer.routeName);
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.remove_red_eye),
+            onPressed: () {
+              allPlayerProvider.initialData().then((value) {
+                setState(() {});
+              });
             },
           ),
         ],

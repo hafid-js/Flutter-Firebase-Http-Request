@@ -17,7 +17,6 @@ class Players with ChangeNotifier {
   Future<void> addPlayer(String name, String position, String image) {
     DateTime datetimeNow = DateTime.now();
 
-    print("SEBELUM HTTP");
     Uri url = Uri.parse(
         "https://http-req-9401d-default-rtdb.firebaseio.com/players.json");
     return http
@@ -29,7 +28,6 @@ class Players with ChangeNotifier {
               "createdAt": datetimeNow.toString(),
             }))
         .then((response) {
-      print("THEN FUNCTION");
       _allPlayer.add(
         Player(
           id: json.decode(response.body)["name"].toString(),
@@ -43,7 +41,8 @@ class Players with ChangeNotifier {
     });
   }
 
-  Future<void> editPlayer(String id, String name, String position, String image) {
+  Future<void> editPlayer(
+      String id, String name, String position, String image) {
     Uri url = Uri.parse(
         "https://http-req-9401d-default-rtdb.firebaseio.com/players/$id.json");
     return http
@@ -59,6 +58,7 @@ class Players with ChangeNotifier {
       selectPlayer.name = name;
       selectPlayer.position = position;
       selectPlayer.imageUrl = image;
+      notifyListeners();
     });
   }
 
@@ -69,5 +69,29 @@ class Players with ChangeNotifier {
       _allPlayer.removeWhere((element) => element.id == id);
       notifyListeners();
     });
+  }
+
+  Future<void> initialData() async {
+    Uri url = Uri.parse(
+        "https://http-req-9401d-default-rtdb.firebaseio.com/players.json");
+
+    var hasilGetData = await http.get(url);
+
+    var dataResponse = json.decode(hasilGetData.body) as Map<String, dynamic>;
+    // _allPlayer.clear();
+    dataResponse.forEach((key, value) {
+      DateTime dateTimeParse = DateTime.parse(value["createdAt"]);
+      _allPlayer.add(
+        Player(
+          id: key,
+          name: value["name"],
+          position: value["position"],
+          imageUrl: value["imageUrl"],
+          createdAt: dateTimeParse,
+        ),
+      );
+    });
+    print("Berhasil Masukkan Data");
+    notifyListeners();
   }
 }
