@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -13,16 +14,14 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
   bool isInit = true;
-
 
   @override
   void didChangeDependencies() {
-   if(isInit) {
-     Provider.of<Players>(context).initialData();
-   }
-   isInit = false;
+    if (isInit) {
+      Provider.of<Players>(context).initialData();
+    }
+    isInit = false;
     super.didChangeDependencies();
   }
 
@@ -90,9 +89,25 @@ class _HomePageState extends State<HomePage> {
                       arguments: id,
                     );
                   },
-                  leading: CircleAvatar(
-                    backgroundImage: NetworkImage(
-                      allPlayerProvider.allPlayer[index].imageUrl,
+                  // leading: CircleAvatar(
+                  //   backgroundImage: NetworkImage(
+                  //     allPlayerProvider.allPlayer[index].imageUrl,
+                  //   ),
+                  // ),
+                  leading: ClipRRect(
+                    borderRadius: BorderRadius.circular(50),
+                    child: Container(
+                      width: 50,
+                      height: 50,
+                      child: CachedNetworkImage(
+                        imageUrl: allPlayerProvider.allPlayer[index].imageUrl,
+                        placeholder: (context, url) =>
+                            CircularProgressIndicator(),
+                        errorWidget: (context, url, error) => Container(
+                          child: Image.network(
+                              "https://digitalhealthskills.com/wp-content/uploads/2022/11/3da39-no-user-image-icon-27.png"),
+                        ),
+                      ),
                     ),
                   ),
                   title: Text(

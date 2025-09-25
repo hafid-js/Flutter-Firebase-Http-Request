@@ -14,61 +14,87 @@ class Players with ChangeNotifier {
   Player selectById(String id) =>
       _allPlayer.firstWhere((element) => element.id == id);
 
-  Future<void> addPlayer(String name, String position, String image) {
+  addPlayer(String name, String position, String image) async {
     DateTime datetimeNow = DateTime.now();
 
     Uri url = Uri.parse(
         "https://http-req-9401d-default-rtdb.firebaseio.com/players.json");
-    return http
-        .post(url,
-            body: json.encode({
-              "name": name,
-              "position": position,
-              "imageUrl": image,
-              "createdAt": datetimeNow.toString(),
-            }))
-        .then((response) {
-      _allPlayer.add(
-        Player(
-          id: json.decode(response.body)["name"].toString(),
-          name: name,
-          position: position,
-          imageUrl: image,
-          createdAt: datetimeNow,
+
+    try {
+      final response = await http.post(
+        url,
+        body: json.encode(
+          {
+            "name": name,
+            "position": position,
+            "imageUrl": image,
+            "createdAt": datetimeNow.toString(),
+          },
         ),
       );
-      notifyListeners();
-    });
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        _allPlayer.add(
+          Player(
+            id: json.decode(response.body)["name"].toString(),
+            name: name,
+            position: position,
+            imageUrl: image,
+            createdAt: datetimeNow,
+          ),
+        );
+
+        notifyListeners();
+      } else {
+        throw ("${response.statusCode}");
+      }
+    } catch (error) {
+      throw (error);
+    }
   }
 
-  Future<void> editPlayer(
-      String id, String name, String position, String image) {
+  editPlayer(String id, String name, String position, String image) async {
     Uri url = Uri.parse(
         "https://http-req-9401d-default-rtdb.firebaseio.com/players/$id.json");
-    return http
-        .patch(url,
-            body: json.encode({
-              "name": name,
-              "position": position,
-              "imageUrl": image,
-            }))
-        .then((response) {
-      Player selectPlayer =
-          _allPlayer.firstWhere((element) => element.id == id);
-      selectPlayer.name = name;
-      selectPlayer.position = position;
-      selectPlayer.imageUrl = image;
-      notifyListeners();
-    });
+    try {
+      final response = await http.patch(url,
+          body: json.encode({
+            "name": name,
+            "position": position,
+            "imageUrl": image,
+          }));
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        Player selectPlayer =
+            _allPlayer.firstWhere((element) => element.id == id);
+        selectPlayer.name = name;
+        selectPlayer.position = position;
+        selectPlayer.imageUrl = image;
+        notifyListeners();
+
+        notifyListeners();
+      } else {
+        throw ("${response.statusCode}");
+      }
+    } catch (error) {
+      throw (error);
+    }
   }
 
-  Future<void> deletePlayer(String id) {
+  deletePlayer(String id) async {
     Uri url = Uri.parse(
         "https://http-req-9401d-default-rtdb.firebaseio.com/players/$id.json");
-    return http.delete(url).then((response) {
-      _allPlayer.removeWhere((element) => element.id == id);
-      notifyListeners();
-    });
+    try {
+      final response = await http.delete(url).then((response) {
+        _allPlayer.removeWhere((element) => element.id == id);
+        notifyListeners();
+      });
+
+      if (response.statusCode < 200 && response.statusCode >= 300) {
+        throw ("${response.statusCode}");
+      }
+    } catch (error) {
+      throw (error);
+    }
   }
 
   Future<void> initialData() async {
@@ -77,8 +103,17 @@ class Players with ChangeNotifier {
 
     var hasilGetData = await http.get(url);
 
-    var dataResponse = json.decode(hasilGetData.body) as Map<String, dynamic>;
+    var decoded = json.decode(hasilGetData.body);
+
+    if (decoded == null) {
+      print("Data dari Firebase kosong");
+      return;
+    }
+
+    var dataResponse = decoded as Map<String, dynamic>;
+
     // _allPlayer.clear();
+
     dataResponse.forEach((key, value) {
       DateTime dateTimeParse = DateTime.parse(value["createdAt"]);
       _allPlayer.add(
